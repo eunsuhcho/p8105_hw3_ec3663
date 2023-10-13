@@ -143,6 +143,30 @@ In 2002, `r with(brfss_02_df, paste(state), collapse = ", ")` were observed at 7
 
 In 2010, `r with(brfss_10_df, paste(state), collapse = ", ")` were observed at 7 or more locations.
 
+## Construct a dataset limited to `Excellent` responses
+
+```{r}
+brfss_ex_df = brfss_df |> 
+  filter(response == "Excellent") |> 
+  group_by(state, year) |> 
+  mutate(avg_data_value = mean(data_value, na.rm = TRUE)) |> 
+  select(year, state, avg_data_value)
+```
+
+The resulting dataset that is limited to `Excellent` responses has `r nrow(brfss_ex_df)` observations.
+
+### Create a "spaghetti" plot of the average value over time within a state
+
+```{r}
+ggplot(brfss_ex_df, aes(x = year, y = avg_data_value, group = state, color = state)) +
+  geom_line() +
+  labs(title = "Average Data Value by State over Years", x = "Year", y = "Average Data Value", color = "State") +
+  theme_minimal()
+```
+
+The "spaghetti" plot shows a general decrease in average data value over time. The range from 17.5 to 27.5 contains the majority of the average data values, but some fall outside of this range. The state of WV in particular is a visible outlier.
+
+## Make a two-panel plot showing, for 2006 and 2010, the `data_value` distribution for responses ("Poor" to "Excellent") among NY State locations
 
 
 
