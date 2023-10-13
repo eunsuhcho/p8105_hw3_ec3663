@@ -231,7 +231,7 @@ table_gend_educats = merged_df |>
 
 The highest number of observations for both men and women was in the education category `More than high school`, with `r sum(with(merged_df, sex == "Female" & education == "More than high school"))` women and `r sum(with(merged_df, sex == "Male" & education == "More than high school"))` men.
 
-## Create a visuation of the age distributions for men and women in each education category
+## Create a visualization of the age distributions for men and women in each education category
 
 ```{r}
 merged_df |> 
@@ -242,6 +242,8 @@ merged_df |>
          y = "Age") +
    theme_minimal()
 ```
+
+The age distribution is displayed with boxplots by education category. Females, on average, are older in the "high school equivalent" education category. Males are older in the "less than high school" and "more than high school" categories.
 
 
 
