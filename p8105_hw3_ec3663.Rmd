@@ -153,7 +153,7 @@ brfss_ex_df = brfss_df |>
   select(year, state, avg_data_value)
 ```
 
-The resulting dataset that is limited to `Excellent` responses has `r nrow(brfss_ex_df)` observations.
+The resulting dataset that is limited to "Excellent" responses has `r nrow(brfss_ex_df)` observations.
 
 ### Create a "spaghetti" plot of the average value over time within a state
 
@@ -229,7 +229,7 @@ table_gend_educats = merged_df |>
   knitr::kable(table_gend_educats, caption = "Number of Men and Women in Each Education Category")
 ```
 
-The highest number of observations for both men and women was in the education category `More than high school`, with `r sum(with(merged_df, sex == "Female" & education == "More than high school"))` women and `r sum(with(merged_df, sex == "Male" & education == "More than high school"))` men.
+The highest number of observations for both men and women was in the education category "More than high school", with `r sum(with(merged_df, sex == "Female" & education == "More than high school"))` women and `r sum(with(merged_df, sex == "Male" & education == "More than high school"))` men.
 
 ## Create a visualization of the age distributions for men and women in each education category
 
@@ -245,6 +245,49 @@ merged_df |>
 
 The age distribution is displayed with boxplots by education category. Females, on average, are older in the "high school equivalent" education category. Males are older in the "less than high school" and "more than high school" categories.
 
+## Create a total activity variable for each participant
 
+```{r}
+total_activity_df = merged_df |> 
+  mutate(
+    total_activity = rowSums(across(c(min1:min1440))))
+```
 
+## Plot total activities against age
 
+```{r}
+ggplot(total_activity_df, aes(x = age, y = total_activity, color = sex)) +
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~ education) +
+  labs(title = "Total Activity by Gender and Education Level",
+       x = "Age",
+       y = "Total Activity")
+```
+
+Total activity decreases overall with age for both men and women in all educational categories. For the education levels "high school equivalent" and "more than high school," women tend to be more active, as displayed by the trend line. The greatest decline in trend line for both genders can be observed in the education level "less than high school."
+
+## Make a three-panel plot showing 24-hour activity time courses for each education level by sex
+
+```{r}
+time_course_df = total_activity_df |> 
+  group_by(education, sex) |> 
+  summarize(across(starts_with("min"), ~mean(.), .names = "mean_{.col}")) |> 
+  pivot_longer(
+    cols = starts_with ("mean"),
+    names_to = "time",
+    values_to = "mean") |> 
+  mutate(time = substring(time, 9),
+         time = as.numeric(time))
+
+time_course_df |> 
+  ggplot(aes(x = time, y = mean, color = sex)) +
+  geom_point(alpha = .3, size = .1) +
+  geom_smooth() +
+  facet_wrap(. ~ education) +
+  labs(title = "24-hour Activity Time Course by Education Level and Gender",
+       x = "Time(min)",
+       y = "Mean Activity")
+```
+
+For all three education levels, activity dips before sharply increasing. Activity for all categories decreases after midday. The education category "Less than high school" displays the highest level of activity.
